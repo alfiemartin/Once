@@ -1,0 +1,9 @@
+chats open up chat modal
+
+Maybe just a headshot
+if no pic then full width w/ name
+
+
+//groups arent so mych groups but local tags 
+
+//potentiall tranparent text boxes for chat with a colored background
