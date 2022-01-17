@@ -56,9 +56,12 @@ const StoryView = () => {
           y: 0,
         });
       },
-      onPanResponderMove: Animated.event([null, { dx: pan.x }], {useNativeDriver: false}),
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
+      onPanResponderMove: (e, gs) => {
+        Animated.event([null, { dx: pan.x }], {useNativeDriver: false})(e, gs);
+      },
+      onPanResponderRelease: (e, gestureState) => {
+        //console.log(gestureState.dx); will be useful
+
         Animated.timing(pan.x, {
           toValue: 0,
           duration: 200,
