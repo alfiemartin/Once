@@ -1,33 +1,128 @@
-import { BlurView } from "expo-blur";
-import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import { useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  ImageBackground,
+  Animated,
+  GestureResponderEvent,
+  Dimensions,
+  PanResponder,
+} from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ProfileIcon from "../../components/ProfileIcon/ProfileIcon";
+import Icon from "react-native-vector-icons/Ionicons";
+
+interface ISwipeIcon {
+  name: string;
+  size?: number;
+  onPress?:
+    | (((event: GestureResponderEvent) => void) & (() => void))
+    | undefined;
+}
+
+const SwipeIcon = ({ name, size = 40, onPress }: ISwipeIcon) => {
+  return (
+    <View
+      style={{
+        justifyContent: "center",
+        alignItems: "center",
+        width: 40,
+        height: 40,
+      }}
+    >
+      <TouchableOpacity onPress={onPress}>
+        <Icon style={{ flex: 1 }} size={size} name={name} />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const StoryView = () => {
   const inset = useSafeAreaInsets();
   const image =
     "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3";
 
+  const swipeAnimation = useRef(new Animated.Value(0)).current;
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: 0,
+          y: 0,
+        });
+      },
+      onPanResponderMove: Animated.event([null, { dx: pan.x }], {useNativeDriver: true}),
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      },
+    })
+  ).current;
+
+  const swipeRight = () => {
+    const swipe = Animated.timing(swipeAnimation, {
+      toValue: Dimensions.get("screen").width,
+      duration: 1000,
+      useNativeDriver: true,
+    });
+
+    const swipeRev = Animated.timing(swipeAnimation, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: true,
+    });
+
+    swipe.start();
+
+    setTimeout(() => {
+      swipeRev.start();
+    }, 1000);
+  };
+
+  const swipeLeft = () => {
+    const swipe = Animated.timing(swipeAnimation, {
+      toValue: -Dimensions.get("screen").width,
+      duration: 1000,
+      useNativeDriver: true,
+    });
+
+    const swipeRev = Animated.timing(swipeAnimation, {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: true,
+    });
+
+    swipe.start();
+
+    setTimeout(() => {
+      swipeRev.start();
+    }, 1000);
+  };
+
   return (
-    <View style={[styles.container]}>
-      <ImageBackground source={{ uri: image }} style={[styles.mainImage]} imageStyle={{borderBottomLeftRadius: 20, borderBottomRightRadius: 20}}>
-        <BlurView
-          intensity={10}
-          style={[styles.storyTitleContainer, { paddingTop: inset.top }]}
-        >
-          <Text style={styles.storyViewTitle}>Local to you</Text>
-          <ProfileIcon />
-        </BlurView>
-      </ImageBackground>
-      <View style={styles.postersContainer}>
-          <Text style={styles.peoplesTitle}>Your locals</Text>
-          <View style={[styles.peoplesList, { paddingBottom: inset.bottom }]}>
-            <ProfileIcon style={styles.peoplesIcon} />
-            <ProfileIcon style={styles.peoplesIcon} />
-            <ProfileIcon style={styles.peoplesIcon} />
-            <ProfileIcon style={styles.peoplesIcon} />
+    <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
+      <Animated.View
+        style={[{flex: 1}, {
+          transform: [{ translateX: pan.x }],
+        }]}
+        {...panResponder.panHandlers}
+      >
+        <View style={styles.cardContainer}>
+          <ImageBackground
+            source={{ uri: image }}
+            style={[styles.mainImage]}
+            imageStyle={styles.mainImage}
+          ></ImageBackground>
+          <View style={styles.choicesContainer}>
+            <SwipeIcon name="ios-close-circle" onPress={swipeLeft} />
+            <SwipeIcon name="ios-heart-half" />
+            <SwipeIcon name="heart" onPress={swipeRight} />
           </View>
         </View>
+      </Animated.View>
     </View>
   );
 };
@@ -35,40 +130,36 @@ const StoryView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
+    backgroundColor: "#ec4899",
   },
-  storyViewTitle: {
-    padding: 10,
-    color: "white",
+  cardContainer: {
+    flex: 1,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
   },
   mainImage: {
     flex: 1,
     justifyContent: "space-between",
-    backgroundColor: "black"
+    backgroundColor: "black",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  postersContainer: {
-    height: 130,
+  choicesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#fce7f3",
     padding: 10,
-    justifyContent: "space-between",
-    backgroundColor: "black"
-  },
-  peoplesTitle: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    color: "white",
-  },
-  storyTitleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    padding: 10,
-    paddingBottom: 5,
-  },
-  peoplesList: {
-    flexDirection: "row",
-  },
-  peoplesIcon: {
-    marginRight: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 });
 

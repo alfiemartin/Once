@@ -7,6 +7,7 @@ import Camera from "../screens/Camera/Camera";
 import Chat from "../screens/Chat/Chat";
 import ExploreScreen from "../screens/ExploreScreen/ExploreScreen";
 import Profile from "../screens/Profile/Profile";
+import StoryView from "../screens/Stories/StoryView";
 import { SPACING } from "../styles";
 import { IStackNavigation } from "../types";
 
@@ -45,10 +46,19 @@ const TabNav = () => {
     >
       <Tab.Screen
         name="Explore"
-        component={ExploreScreen}
+        component={StoryView}
         options={{
           tabBarIcon: ({ color }) => (
             <TabIcon color={color} icon="ios-disc-outline" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={Chat}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} icon="chatbox-ellipses-outline" />
           ),
         }}
       />
@@ -70,7 +80,7 @@ const screenOptions: MaterialTopTabNavigationOptions = {
   swipeEnabled: Platform.OS !== "web",
   tabBarLabel: () => null,
   tabBarInactiveTintColor: "grey",
-  tabBarActiveTintColor: "blue",
+  tabBarActiveTintColor: "#ec4899",
   tabBarStyle: {backgroundColor: "black"},
 };
 
