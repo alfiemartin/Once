@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -44,6 +44,7 @@ const StoryView = () => {
     "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3";
 
   const swipeAnimation = useRef(new Animated.Value(0)).current;
+  const rotateAnimation = useRef(new Animated.Value(0)).current;
   const pan = useRef(new Animated.ValueXY()).current;
 
   const panResponder = useRef(
@@ -55,58 +56,78 @@ const StoryView = () => {
           y: 0,
         });
       },
-      onPanResponderMove: Animated.event([null, { dx: pan.x }], {useNativeDriver: true}),
+      onPanResponderMove: Animated.event([null, { dx: pan.x }], {useNativeDriver: false}),
       onPanResponderRelease: () => {
         pan.flattenOffset();
+        Animated.timing(pan.x, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
       },
     })
   ).current;
 
+  const rotateRev = Animated.timing(rotateAnimation, {
+    toValue: 0,
+    duration: 1000,
+    useNativeDriver: true,
+  });
+
+  const swipeRev = Animated.timing(swipeAnimation, {
+    toValue: 0,
+    duration: 1000,
+    useNativeDriver: true,
+  });
+
   const swipeRight = () => {
     const swipe = Animated.timing(swipeAnimation, {
-      toValue: Dimensions.get("screen").width,
+      toValue: Dimensions.get("screen").width * 2,
       duration: 1000,
       useNativeDriver: true,
     });
 
-    const swipeRev = Animated.timing(swipeAnimation, {
-      toValue: 0,
+    const rotate = Animated.timing(rotateAnimation, {
+      toValue: 1,
       duration: 1000,
       useNativeDriver: true,
     });
 
     swipe.start();
-
+    rotate.start();
     setTimeout(() => {
       swipeRev.start();
+      rotateRev.start();
     }, 1000);
   };
 
   const swipeLeft = () => {
     const swipe = Animated.timing(swipeAnimation, {
-      toValue: -Dimensions.get("screen").width,
+      toValue: -Dimensions.get("screen").width * 2,
       duration: 1000,
       useNativeDriver: true,
     });
 
-    const swipeRev = Animated.timing(swipeAnimation, {
-      toValue: 0,
+    const rotate = Animated.timing(rotateAnimation, {
+      toValue: -1,
       duration: 1000,
       useNativeDriver: true,
     });
 
     swipe.start();
-
+    rotate.start();
     setTimeout(() => {
       swipeRev.start();
+      rotateRev.start();
     }, 1000);
   };
+
 
   return (
     <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
       <Animated.View
         style={[{flex: 1}, {
-          transform: [{ translateX: pan.x }],
+          transform: [{ translateX: pan.x }, {translateX: swipeAnimation}, {rotate: rotateAnimation}],
         }]}
         {...panResponder.panHandlers}
       >
