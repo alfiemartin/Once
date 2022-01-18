@@ -8,6 +8,7 @@ import Chat from "../screens/Chat/Chat";
 import ExploreScreen from "../screens/ExploreScreen/ExploreScreen";
 import Profile from "../screens/Profile/Profile";
 import StoryView from "../screens/Stories/StoryView";
+import StoryViewReanim from "../screens/StoryViewReanim";
 import { SPACING } from "../styles";
 import { IStackNavigation } from "../types";
 
@@ -50,6 +51,15 @@ const TabNav = () => {
         options={{
           tabBarIcon: ({ color }) => (
             <TabIcon color={color} icon="ios-disc-outline" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="ReanimatedTest"
+        component={StoryViewReanim}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} icon="barcode" />
           ),
         }}
       />
