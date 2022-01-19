@@ -43,96 +43,12 @@ const StoryView = () => {
   const image =
     "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3";
 
-  const swipeAnimation = useRef(new Animated.Value(0)).current;
-  const rotateAnimation = useRef(new Animated.Value(0)).current;
-  const pan = useRef(new Animated.ValueXY()).current;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: 0,
-          y: 0,
-        });
-      },
-      onPanResponderMove: (e, gs) => {
-        Animated.event([null, { dx: pan.x }], {useNativeDriver: false})(e, gs);
-      },
-      onPanResponderRelease: (e, gestureState) => {
-        //console.log(gestureState.dx); will be useful
-
-        Animated.timing(pan.x, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }).start();
-      },
-    })
-  ).current;
-
-  const rotateRev = Animated.timing(rotateAnimation, {
-    toValue: 0,
-    duration: 1000,
-    useNativeDriver: true,
-  });
-
-  const swipeRev = Animated.timing(swipeAnimation, {
-    toValue: 0,
-    duration: 1000,
-    useNativeDriver: true,
-  });
-
-  const swipeRight = () => {
-    const swipe = Animated.timing(swipeAnimation, {
-      toValue: Dimensions.get("screen").width * 2,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    const rotate = Animated.timing(rotateAnimation, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    swipe.start();
-    rotate.start();
-    setTimeout(() => {
-      swipeRev.start();
-      rotateRev.start();
-    }, 1000);
-  };
-
-  const swipeLeft = () => {
-    const swipe = Animated.timing(swipeAnimation, {
-      toValue: -Dimensions.get("screen").width * 2,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    const rotate = Animated.timing(rotateAnimation, {
-      toValue: -1,
-      duration: 1000,
-      useNativeDriver: true,
-    });
-
-    swipe.start();
-    rotate.start();
-    setTimeout(() => {
-      swipeRev.start();
-      rotateRev.start();
-    }, 1000);
-  };
 
 
   return (
     <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
       <Animated.View
-        style={[{flex: 1}, {
-          transform: [{ translateX: pan.x }, {translateX: swipeAnimation}, {rotate: rotateAnimation}],
-        }]}
-        {...panResponder.panHandlers}
+        style={[{flex: 1}]}
       >
         <View style={styles.cardContainer}>
           <ImageBackground
@@ -141,9 +57,9 @@ const StoryView = () => {
             imageStyle={styles.mainImage}
           ></ImageBackground>
           <View style={styles.choicesContainer}>
-            <SwipeIcon name="ios-close-circle" onPress={swipeLeft} />
+            <SwipeIcon name="ios-close-circle" />
             <SwipeIcon name="ios-heart-half" />
-            <SwipeIcon name="heart" onPress={swipeRight} />
+            <SwipeIcon name="heart" />
           </View>
         </View>
       </Animated.View>
