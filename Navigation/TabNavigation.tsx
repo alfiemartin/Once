@@ -3,14 +3,10 @@ import React from "react";
 import { Dimensions, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import Camera from "../screens/Camera/Camera";
 import Chat from "../screens/Chat/Chat";
-import ExploreScreen from "../screens/ExploreScreen/ExploreScreen";
 import Profile from "../screens/Profile/Profile";
 import StoryView from "../screens/Stories/StoryView";
 import StoryViewReanim from "../screens/StoryViewReanim";
-import { SPACING } from "../styles";
-import { IStackNavigation } from "../types";
 
 interface IconProps {
   color: string;
@@ -95,7 +91,7 @@ const screenOptions: MaterialTopTabNavigationOptions = {
 };
 
 const styles = StyleSheet.create({
-  scene: {backgroundColor: "white", borderBottomRightRadius: SPACING.xl, borderBottomLeftRadius: SPACING.xl}
+  scene: {backgroundColor: "white"}
 })
 
 export default TabNav;

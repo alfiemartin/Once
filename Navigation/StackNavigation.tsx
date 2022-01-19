@@ -22,8 +22,6 @@ const Navigation = () => {
           headerBackground: () => null,
           cardStyle: { 
             backgroundColor: "black",
-            borderTopLeftRadius: SPACING.xl,
-            borderTopRightRadius: SPACING.xl
           },
         }}
       >
