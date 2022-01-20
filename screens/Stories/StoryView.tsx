@@ -1,15 +1,24 @@
-import { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
-  Image,
   ImageBackground,
-  Animated,
   GestureResponderEvent,
   Dimensions,
-  PanResponder,
 } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  PanGestureHandler,
+  TouchableOpacity,
+} from "react-native-gesture-handler";
+import Animated, {
+  Easing,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  WithSpringConfig,
+  withTiming,
+  WithTimingConfig,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
@@ -43,26 +52,89 @@ const StoryView = () => {
   const image =
     "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3";
 
+  const screenWidth = Dimensions.get("screen").width;
 
+  const gestureTranslationX = useSharedValue(0);
+  const swipeRightTranslationX = useSharedValue(0);
+  const swipeRightRotation = useSharedValue(0);
+  const gestureRotation = useSharedValue(0);
+
+  const aSwipeConfig: WithTimingConfig = {
+    duration: 500,
+  };
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, ctx: any) => {
+      ctx.startX = gestureTranslationX.value;
+    },
+    onActive: (event, ctx) => {
+      gestureTranslationX.value = ctx.startX + event.translationX * 2;
+      gestureRotation.value = ctx.startX + event.translationX;
+      gestureRotation.value = (gestureRotation.value * 90) / screenWidth;
+    },
+    onEnd: (_) => {
+      gestureTranslationX.value = withSpring(0, { overshootClamping: true });
+      gestureRotation.value = withSpring(0, { overshootClamping: true });
+    },
+  });
+
+  const gestureSwipeStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: gestureTranslationX.value,
+        },
+        {
+          rotate: `${gestureRotation.value}deg`,
+        },
+      ],
+    };
+  });
+
+  const aRightSwipeStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: withTiming(
+            swipeRightTranslationX.value,
+            aSwipeConfig,
+            () => (swipeRightTranslationX.value = 0)
+          ),
+        },
+        {
+          rotate: `${swipeRightRotation.value}rot`,
+        },
+      ],
+    };
+  });
 
   return (
     <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
-      <Animated.View
-        style={[{flex: 1}]}
-      >
-        <View style={styles.cardContainer}>
-          <ImageBackground
-            source={{ uri: image }}
-            style={[styles.mainImage]}
-            imageStyle={styles.mainImage}
-          ></ImageBackground>
-          <View style={styles.choicesContainer}>
-            <SwipeIcon name="ios-close-circle" />
-            <SwipeIcon name="ios-heart-half" />
-            <SwipeIcon name="heart" />
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View
+          style={[{ flex: 1 }, gestureSwipeStyles, aRightSwipeStyles]}
+        >
+          <View style={styles.cardContainer}>
+            <ImageBackground
+              source={{ uri: image }}
+              style={[styles.mainImage]}
+              imageStyle={styles.mainImage}
+            ></ImageBackground>
+            <View style={[styles.choicesContainer]}>
+              <SwipeIcon name="ios-close-circle" />
+              <SwipeIcon name="ios-heart-half" />
+              <SwipeIcon
+                name="heart"
+                onPress={() => {
+                  console.log("hello world");
+                  swipeRightTranslationX.value = screenWidth;
+                  swipeRightRotation.value = withTiming(1, aSwipeConfig);
+                }}
+              />
+            </View>
           </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </PanGestureHandler>
     </View>
   );
 };
