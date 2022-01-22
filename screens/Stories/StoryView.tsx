@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -57,6 +58,8 @@ const StoryView = () => {
   const swipeTranslationX = useSharedValue(0);
   const swipeRotation = useSharedValue(0);
   const gestureRotation = useSharedValue(0);
+  const swipeIndicatorOpacity = useSharedValue(0);
+  const [gestureIndicatorEmoji, setGestureIndicatorEmoji] = useState("❤️");
 
   const aSwipeConfig: WithTimingConfig = {
     duration: 500,
@@ -90,7 +93,7 @@ const StoryView = () => {
     };
   });
 
-  const aRightSwipeStyles = useAnimatedStyle(() => {
+  const aSwipeStyles = useAnimatedStyle(() => {
     return {
       transform: [
         {
@@ -107,42 +110,43 @@ const StoryView = () => {
     };
   });
 
+  const aSwipeIndicatorStyles = useAnimatedStyle(() => {
+    return {
+      opacity: swipeIndicatorOpacity.value,
+    };
+  });
+
   const swipeInDirection = (direction: string) => {
     const right = direction === "right";
+
+    setGestureIndicatorEmoji(right ? "❤️" : "❌");
 
     swipeTranslationX.value = (right ? screenWidth : -screenWidth) * 1.3;
     swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
       swipeRotation.value = withTiming(0, aSwipeConfig);
+    });
+    swipeIndicatorOpacity.value = withTiming(1, { duration: 200 }, () => {
+      swipeIndicatorOpacity.value = withTiming(0, { duration: 200 });
     });
   };
 
   return (
     <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
       <PanGestureHandler onGestureEvent={gestureHandler}>
-        <Animated.View
-          style={[{ flex: 1 }, gestureSwipeStyles, aRightSwipeStyles]}
-        >
+        <Animated.View style={[{ flex: 1 }, gestureSwipeStyles, aSwipeStyles]}>
           <View style={styles.cardContainer}>
             <ImageBackground
               source={{ uri: image }}
               style={[styles.mainImage]}
               imageStyle={styles.mainImage}
             >
-              <View
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  zIndex: 1000,
-                }}
+              <Animated.View
+                style={[styles.swipeIndicatorContainer, aSwipeIndicatorStyles]}
               >
-                <Text style={{ zIndex: 1000, fontSize: 200 }}>❤️</Text>
-              </View>
+                <Text style={[{ zIndex: 1000, fontSize: 200 }]}>
+                  {gestureIndicatorEmoji}
+                </Text>
+              </Animated.View>
             </ImageBackground>
             <View style={[styles.choicesContainer]}>
               <SwipeIcon
@@ -195,6 +199,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+  },
+  swipeIndicatorContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
   },
 });
 

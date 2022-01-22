@@ -84,7 +84,7 @@ const screenOptions: MaterialTopTabNavigationOptions = {
 };
 
 const styles = StyleSheet.create({
-  scene: { backgroundColor: "white" },
+  scene: { backgroundColor: "#fae8ff" },
 });
 
 export default TabNav;

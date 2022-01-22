@@ -31,27 +31,32 @@ const Chatting = () => {
   const [inputText, setInputText] = useState<string>("");
 
   const updateList = () => {
-    setConvo(val => ([...val, inputText]));
+    setConvo((val) => [...val, inputText]);
     setInputText("");
   };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     Keyboard.dismiss();
-  }
+  };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}  style={[styles.container]}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={[styles.container]}
+    >
       <ScrollView
         contentOffset={{ x: 0, y: -inset.top }}
         contentInset={{ top: inset.top }}
-        onContentSizeChange={() => scrollRef.current?.scrollToEnd({animated: true})}
+        onContentSizeChange={() =>
+          scrollRef.current?.scrollToEnd({ animated: true })
+        }
         style={styles.scrollContainer}
         ref={scrollRef}
       >
         {convo.map((data, i) => (
           <View key={i}>
             {i == 0 && <View style={{ marginTop: 80 }} />}
-            <ChatBubble me={i%2 == 0 ? true : false} content={data} />
+            <ChatBubble me={i % 2 == 0 ? true : false} content={data} />
           </View>
         ))}
       </ScrollView>
@@ -64,13 +69,18 @@ const Chatting = () => {
       <View style={[styles.inputContainer, { paddingBottom: inset.bottom }]}>
         <TextInput
           placeholder="..."
-          onPressOut={() => scrollRef.current?.scrollToEnd({animated: true})}
+          onPressOut={() => scrollRef.current?.scrollToEnd({ animated: true })}
           placeholderTextColor={"white"}
           value={inputText}
           onChangeText={(val) => setInputText(val)}
           style={styles.textInput}
         />
-        <Icon onPress={updateList} name="md-arrow-up-circle" color={"blue"} size={40} /> 
+        <Icon
+          onPress={updateList}
+          name="md-arrow-up-circle"
+          color={"blue"}
+          size={40}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -116,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
     alignItems: "center",
     paddingLeft: SPACING.sm,
-    paddingRight: SPACING.sm
+    paddingRight: SPACING.sm,
   },
   textInput: {
     color: "white",
@@ -124,8 +134,8 @@ const styles = StyleSheet.create({
     borderRadius: SPACING.md,
     marginRight: SPACING.sm,
     flex: 1,
-    backgroundColor: "blue"
-  }
+    backgroundColor: "blue",
+  },
 });
 
 export default Chatting;

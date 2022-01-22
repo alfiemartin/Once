@@ -6,7 +6,7 @@ const Profile = () => {
   const inset = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, {paddingTop: inset.top}]}>
+    <View style={[styles.container, { paddingTop: inset.top }]}>
       <Text>Profile</Text>
     </View>
   );
@@ -15,7 +15,7 @@ const Profile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#fae8ff",
     alignItems: "center",
     justifyContent: "center",
   },

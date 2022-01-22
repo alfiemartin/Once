@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ProfileIcon from "../../components/ProfileIcon/ProfileIcon";
 import { IStackNavigation } from "../../types";
 
-const Chat = ({navigation}: IStackNavigation) => {
+const Chat = ({ navigation }: IStackNavigation) => {
   const inset = useSafeAreaInsets();
 
   const [chatData, setChatData] = useState([
@@ -35,7 +35,10 @@ const Chat = ({navigation}: IStackNavigation) => {
         contentInset={{ top: inset.top }}
       >
         {chatData.map((data, i) => (
-          <TouchableOpacity onPress={() => navigation.navigate("Chatting")} key={i}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Chatting")}
+            key={i}
+          >
             <View style={styles.chatContainer}>
               {data.uri.length > 0 && <ProfileIcon />}
               <Text style={styles.chatTitle}>{data.name}</Text>
@@ -50,7 +53,7 @@ const Chat = ({navigation}: IStackNavigation) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#fae8ff",
     marginLeft: 5,
     marginRight: 5,
   },
