@@ -4,6 +4,7 @@ import {
   ImageBackground,
   GestureResponderEvent,
   Dimensions,
+  Text,
 } from "react-native";
 import {
   PanGestureHandler,
@@ -58,7 +59,7 @@ const StoryView = () => {
   const gestureRotation = useSharedValue(0);
 
   const aSwipeConfig: WithTimingConfig = {
-    duration: 700,
+    duration: 500,
   };
 
   const gestureHandler = useAnimatedGestureHandler({
@@ -126,7 +127,23 @@ const StoryView = () => {
               source={{ uri: image }}
               style={[styles.mainImage]}
               imageStyle={styles.mainImage}
-            ></ImageBackground>
+            >
+              <View
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  zIndex: 1000,
+                }}
+              >
+                <Text style={{ zIndex: 1000, fontSize: 200 }}>❤️</Text>
+              </View>
+            </ImageBackground>
             <View style={[styles.choicesContainer]}>
               <SwipeIcon
                 name="ios-close-circle"
@@ -149,7 +166,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#ec4899",
+    backgroundColor: "#fae8ff",
   },
   cardContainer: {
     flex: 1,
