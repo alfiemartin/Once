@@ -10,12 +10,10 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  WithSpringConfig,
   withTiming,
   WithTimingConfig,
 } from "react-native-reanimated";
@@ -55,12 +53,12 @@ const StoryView = () => {
   const screenWidth = Dimensions.get("screen").width;
 
   const gestureTranslationX = useSharedValue(0);
-  const swipeRightTranslationX = useSharedValue(0);
-  const swipeRightRotation = useSharedValue(0);
+  const swipeTranslationX = useSharedValue(0);
+  const swipeRotation = useSharedValue(0);
   const gestureRotation = useSharedValue(0);
 
   const aSwipeConfig: WithTimingConfig = {
-    duration: 500,
+    duration: 700,
   };
 
   const gestureHandler = useAnimatedGestureHandler({
@@ -96,17 +94,26 @@ const StoryView = () => {
       transform: [
         {
           translateX: withTiming(
-            swipeRightTranslationX.value,
+            swipeTranslationX.value,
             aSwipeConfig,
-            () => (swipeRightTranslationX.value = 0)
+            () => (swipeTranslationX.value = 0)
           ),
         },
         {
-          rotate: `${swipeRightRotation.value}rot`,
+          rotate: `${swipeRotation.value}deg`,
         },
       ],
     };
   });
+
+  const swipeInDirection = (direction: string) => {
+    const right = direction === "right";
+
+    swipeTranslationX.value = (right ? screenWidth : -screenWidth) * 1.3;
+    swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
+      swipeRotation.value = withTiming(0, aSwipeConfig);
+    });
+  };
 
   return (
     <View style={[styles.container, { paddingTop: inset.top + 20 }]}>
@@ -121,15 +128,14 @@ const StoryView = () => {
               imageStyle={styles.mainImage}
             ></ImageBackground>
             <View style={[styles.choicesContainer]}>
-              <SwipeIcon name="ios-close-circle" />
+              <SwipeIcon
+                name="ios-close-circle"
+                onPress={() => swipeInDirection("left")}
+              />
               <SwipeIcon name="ios-heart-half" />
               <SwipeIcon
                 name="heart"
-                onPress={() => {
-                  console.log("hello world");
-                  swipeRightTranslationX.value = screenWidth;
-                  swipeRightRotation.value = withTiming(1, aSwipeConfig);
-                }}
+                onPress={() => swipeInDirection("right")}
               />
             </View>
           </View>

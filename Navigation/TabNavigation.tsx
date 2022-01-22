@@ -1,4 +1,7 @@
-import { createMaterialTopTabNavigator, MaterialTopTabNavigationOptions } from "@react-navigation/material-top-tabs";
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabNavigationOptions,
+} from "@react-navigation/material-top-tabs";
 import React from "react";
 import { Dimensions, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,7 +9,6 @@ import Icon from "react-native-vector-icons/Ionicons";
 import Chat from "../screens/Chat/Chat";
 import Profile from "../screens/Profile/Profile";
 import StoryView from "../screens/Stories/StoryView";
-import StoryViewReanim from "../screens/StoryViewReanim";
 
 interface IconProps {
   color: string;
@@ -39,7 +41,7 @@ const TabNav = () => {
       screenOptions={screenOptions}
       style={{ marginBottom: inset.bottom }}
       initialRouteName="Explore"
-      initialLayout={{width: Dimensions.get('window').width}}
+      initialLayout={{ width: Dimensions.get("window").width }}
     >
       <Tab.Screen
         name="Explore"
@@ -47,15 +49,6 @@ const TabNav = () => {
         options={{
           tabBarIcon: ({ color }) => (
             <TabIcon color={color} icon="ios-disc-outline" />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="ReanimatedTest"
-        component={StoryViewReanim}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} icon="barcode" />
           ),
         }}
       />
@@ -87,11 +80,11 @@ const screenOptions: MaterialTopTabNavigationOptions = {
   tabBarLabel: () => null,
   tabBarInactiveTintColor: "grey",
   tabBarActiveTintColor: "#ec4899",
-  tabBarStyle: {backgroundColor: "black"},
+  tabBarStyle: { backgroundColor: "black" },
 };
 
 const styles = StyleSheet.create({
-  scene: {backgroundColor: "white"}
-})
+  scene: { backgroundColor: "white" },
+});
 
 export default TabNav;
