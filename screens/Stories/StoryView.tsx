@@ -13,9 +13,7 @@ const StoryView = () => {
   const inset = useSafeAreaInsets();
 
   const [data, setData] = useState(storyViewData);
-  const first = storyViewData[0];
   const [uiData, setUiData] = useState<TData[]>([data[0], data[1]]);
-  const [counter, setCounter] = useState(3);
 
   useEffect(() => {
     setData((old) => {
@@ -45,11 +43,6 @@ const StoryView = () => {
             key={index}
             updateCardsUi={updateCardsUi}
             inView={index == 0}
-            styles={[
-              index == 2
-                ? { transform: [{ translateY: -5 }] }
-                : { transform: [{ translateY: 0 }] },
-            ]}
           />
         ))
         .reverse()}

@@ -24,7 +24,7 @@ interface IStoryCard {
     name: string;
     image: string;
   };
-  styles: StyleProp<ViewStyle>;
+  styles?: StyleProp<ViewStyle>;
   updateCardsUi: () => void;
   inView: boolean;
 }
@@ -36,7 +36,6 @@ const StoryCard = ({
   inView,
 }: IStoryCard) => {
   const image = data.image;
-
   const screenWidth = Dimensions.get("screen").width;
 
   const gestureTranslationX = useSharedValue(0);
@@ -113,7 +112,7 @@ const StoryCard = ({
     const right = direction === "right";
 
     swipeTranslationX.value = withTiming(
-      (right ? screenWidth : -screenWidth) * 1.3,
+      (right ? screenWidth * 2 : -screenWidth * 2) * 1.5,
       aSwipeConfig,
       () => {
         swipeTranslationX.value = withTiming(
