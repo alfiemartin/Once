@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
+  runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -62,7 +63,31 @@ const StoryCard = ({
       (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
         Math.abs((event.translationX * 3) / screenWidth);
     },
-    onEnd: (_) => {
+    onEnd: () => {
+      if (Math.abs(gestureTranslationX.value) > screenWidth * 0.8) {
+        gestureTranslationX.value = withSpring(
+          screenWidth * 2,
+          {
+            overshootClamping: true,
+          },
+          () => {
+            runOnJS(updateCardsUi)();
+            gestureRotation.value = 0;
+            swipeLeftIndicatorOpacity.value = 0;
+            swipeRightIndicatorOpacity.value = 0;
+            gestureTranslationX.value = withTiming(
+              -screenWidth,
+              { duration: 0 },
+              () => {
+                gestureTranslationX.value = withTiming(0, aSwipeConfig);
+              }
+            );
+          }
+        );
+
+        return;
+      }
+
       gestureTranslationX.value = withSpring(0, { overshootClamping: true });
       gestureRotation.value = withSpring(0, { overshootClamping: true });
       swipeLeftIndicatorOpacity.value = withTiming(0, { duration: 100 });
