@@ -5,8 +5,6 @@ import {
   View,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  GestureResponderEvent,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -17,36 +15,17 @@ import Animated, {
   withTiming,
   WithTimingConfig,
 } from "react-native-reanimated";
-import Icon from "react-native-vector-icons/Ionicons";
+import SwipeIcon from "../SwipeIcon/SwipeIcon";
 
-interface ISwipeIcon {
-  name: string;
-  size?: number;
-  onPress?:
-    | (((event: GestureResponderEvent) => void) & (() => void))
-    | undefined;
+interface IStoryCard {
+  data: {
+    name: string;
+    image: string;
+  };
 }
 
-const SwipeIcon = ({ name, size = 40, onPress }: ISwipeIcon) => {
-  return (
-    <View
-      style={{
-        justifyContent: "center",
-        alignItems: "center",
-        width: 40,
-        height: 40,
-      }}
-    >
-      <TouchableOpacity onPress={onPress}>
-        <Icon style={{ flex: 1 }} size={size} name={name} />
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const StoryCard = () => {
-  const image =
-    "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3";
+const StoryCard = ({ data }: IStoryCard) => {
+  const image = data.image;
 
   const screenWidth = Dimensions.get("screen").width;
 
@@ -54,8 +33,8 @@ const StoryCard = () => {
   const swipeTranslationX = useSharedValue(0);
   const swipeRotation = useSharedValue(0);
   const gestureRotation = useSharedValue(0);
-  const swipeIndicatorOpacity = useSharedValue(0);
-  const [gestureIndicatorEmoji, setGestureIndicatorEmoji] = useState("❤️");
+  const swipeLeftIndicatorOpacity = useSharedValue(0);
+  const swipeRightIndicatorOpacity = useSharedValue(0);
 
   const aSwipeConfig: WithTimingConfig = {
     duration: 500,
@@ -70,14 +49,15 @@ const StoryCard = () => {
       gestureRotation.value = ctx.startX + event.translationX;
       gestureRotation.value = (gestureRotation.value * 90) / screenWidth;
 
-      swipeIndicatorOpacity.value = Math.abs(
-        (event.translationX * 3) / screenWidth
-      );
+      const right = ctx.startX + event.translationX > 0;
+      (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
+        Math.abs((event.translationX * 3) / screenWidth);
     },
     onEnd: (_) => {
       gestureTranslationX.value = withSpring(0, { overshootClamping: true });
       gestureRotation.value = withSpring(0, { overshootClamping: true });
-      swipeIndicatorOpacity.value = withTiming(0, { duration: 100 });
+      swipeLeftIndicatorOpacity.value = withTiming(0, { duration: 100 });
+      swipeRightIndicatorOpacity.value = withTiming(0, { duration: 100 });
     },
   });
 
@@ -111,24 +91,31 @@ const StoryCard = () => {
     };
   });
 
-  const aSwipeIndicatorStyles = useAnimatedStyle(() => {
+  const aSwipeLeftIndicatorStyles = useAnimatedStyle(() => {
     return {
-      opacity: swipeIndicatorOpacity.value,
+      opacity: swipeLeftIndicatorOpacity.value,
+    };
+  });
+
+  const aSwipeRightIndicatorStyles = useAnimatedStyle(() => {
+    return {
+      opacity: swipeRightIndicatorOpacity.value,
     };
   });
 
   const swipeInDirection = (direction: string) => {
     const right = direction === "right";
 
-    setGestureIndicatorEmoji(right ? "❤️" : "❌");
-
     swipeTranslationX.value = (right ? screenWidth : -screenWidth) * 1.3;
     swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
       swipeRotation.value = withTiming(0, aSwipeConfig);
     });
-    swipeIndicatorOpacity.value = withTiming(1, { duration: 200 }, () => {
-      swipeIndicatorOpacity.value = withTiming(0, { duration: 200 });
-    });
+
+    (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
+      withTiming(1, { duration: 200 }, () => {
+        (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
+          withTiming(0, { duration: 200 });
+      });
   };
 
   return (
@@ -143,11 +130,20 @@ const StoryCard = () => {
             imageStyle={styles.mainImage}
           >
             <Animated.View
-              style={[styles.swipeIndicatorContainer, aSwipeIndicatorStyles]}
+              style={[
+                styles.swipeIndicatorContainer,
+                aSwipeRightIndicatorStyles,
+              ]}
             >
-              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>
-                {gestureIndicatorEmoji}
-              </Text>
+              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text>
+            </Animated.View>
+            <Animated.View
+              style={[
+                styles.swipeIndicatorContainer,
+                aSwipeLeftIndicatorStyles,
+              ]}
+            >
+              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text>
             </Animated.View>
           </ImageBackground>
           <View style={[styles.choicesContainer]}>
