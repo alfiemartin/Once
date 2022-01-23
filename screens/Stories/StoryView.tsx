@@ -14,12 +14,11 @@ const StoryView = () => {
 
   const [data, setData] = useState(storyViewData);
   const first = storyViewData[0];
-  const [uiData, setUiData] = useState<TData[]>([data[0], data[1], data[2]]);
+  const [uiData, setUiData] = useState<TData[]>([data[0], data[1]]);
   const [counter, setCounter] = useState(3);
 
   useEffect(() => {
     setData((old) => {
-      old.shift();
       old.shift();
       old.shift();
       return old;
@@ -28,7 +27,7 @@ const StoryView = () => {
 
   const updateCardsUi = () => {
     setUiData((old) => {
-      return [old[1], old[2], data[0]];
+      return [old[1], data[0]];
     });
 
     setData((old) => {

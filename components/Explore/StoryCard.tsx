@@ -88,11 +88,7 @@ const StoryCard = ({
     return {
       transform: [
         {
-          translateX: withTiming(
-            swipeTranslationX.value,
-            aSwipeConfig,
-            () => (swipeTranslationX.value = 0)
-          ),
+          translateX: swipeTranslationX.value,
         },
         {
           rotate: `${swipeRotation.value}deg`,
@@ -116,9 +112,22 @@ const StoryCard = ({
   const swipeInDirection = (direction: string) => {
     const right = direction === "right";
 
-    swipeTranslationX.value = (right ? screenWidth : -screenWidth) * 1.3;
+    swipeTranslationX.value = withTiming(
+      (right ? screenWidth : -screenWidth) * 1.3,
+      aSwipeConfig,
+      () => {
+        swipeTranslationX.value = withTiming(
+          -screenWidth,
+          { duration: 0 },
+          () => {
+            swipeTranslationX.value = withTiming(0, aSwipeConfig);
+          }
+        );
+      }
+    );
+
     swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
-      swipeRotation.value = withTiming(0, aSwipeConfig);
+      swipeRotation.value = 0;
     });
 
     (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
@@ -139,7 +148,10 @@ const StoryCard = ({
           <ImageBackground
             source={{ uri: image }}
             style={[styles.mainImage]}
-            imageStyle={[styles.mainImage]}
+            imageStyle={[
+              styles.mainImage,
+              { display: inView ? "flex" : "none" },
+            ]}
           >
             <Animated.View
               style={[
@@ -158,7 +170,12 @@ const StoryCard = ({
               <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text>
             </Animated.View>
           </ImageBackground>
-          <View style={[styles.choicesContainer]}>
+          <View
+            style={[
+              styles.choicesContainer,
+              { display: inView ? "flex" : "none" },
+            ]}
+          >
             <SwipeIcon
               name="ios-close-circle"
               onPress={() => swipeInDirection("left")}
@@ -181,6 +198,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
+    overflow: "hidden",
   },
   cardContainer: {
     flex: 1,
@@ -192,7 +210,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-
     elevation: 5,
   },
   mainImage: {
@@ -201,6 +218,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fce7f3",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   choicesContainer: {
     flexDirection: "row",
