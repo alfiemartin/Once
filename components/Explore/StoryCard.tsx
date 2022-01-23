@@ -5,6 +5,8 @@ import {
   View,
   StyleSheet,
   Text,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -22,9 +24,17 @@ interface IStoryCard {
     name: string;
     image: string;
   };
+  styles: StyleProp<ViewStyle>;
+  updateCardsUi: () => void;
+  inView: boolean;
 }
 
-const StoryCard = ({ data }: IStoryCard) => {
+const StoryCard = ({
+  data,
+  styles: viewStyles,
+  updateCardsUi,
+  inView,
+}: IStoryCard) => {
   const image = data.image;
 
   const screenWidth = Dimensions.get("screen").width;
@@ -116,6 +126,8 @@ const StoryCard = ({ data }: IStoryCard) => {
         (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
           withTiming(0, { duration: 200 });
       });
+
+    updateCardsUi();
   };
 
   return (
@@ -123,11 +135,11 @@ const StoryCard = ({ data }: IStoryCard) => {
       <Animated.View
         style={[styles.container, gestureSwipeStyles, aSwipeStyles]}
       >
-        <View style={styles.cardContainer}>
+        <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
             source={{ uri: image }}
             style={[styles.mainImage]}
-            imageStyle={styles.mainImage}
+            imageStyle={[styles.mainImage]}
           >
             <Animated.View
               style={[
@@ -186,7 +198,7 @@ const styles = StyleSheet.create({
   mainImage: {
     flex: 1,
     justifyContent: "space-between",
-    backgroundColor: "black",
+    backgroundColor: "#fce7f3",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },

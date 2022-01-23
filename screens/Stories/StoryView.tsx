@@ -1,27 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import StoryCard from "../../components/Explore/StoryCard";
+import { storyViewData } from "../../mockData";
+
+type TData = {
+  name: string;
+  image: string;
+};
 
 const StoryView = () => {
   const inset = useSafeAreaInsets();
-  const [data, setData] = useState([
-    {
-      name: "seb",
-      image:
-        "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/groups.jpg?alt=media&token=1cb0b7a8-93f7-467f-934e-11f74a18ddd3",
-    },
-    {
-      name: "alfie",
-      image:
-        "https://firebasestorage.googleapis.com/v0/b/lensflare-41b96.appspot.com/o/MeTwo.jpeg?alt=media&token=8d7f46d1-cd24-4974-b1be-ba85f0527d66",
-    },
-  ]);
+
+  const [data, setData] = useState(storyViewData);
+  const first = storyViewData[0];
+  const [uiData, setUiData] = useState<TData[]>([data[0], data[1], data[2]]);
+  const [counter, setCounter] = useState(3);
+
+  useEffect(() => {
+    setData((old) => {
+      old.shift();
+      old.shift();
+      old.shift();
+      return old;
+    });
+  }, []);
+
+  const updateCardsUi = () => {
+    setUiData((old) => {
+      return [old[1], old[2], data[0]];
+    });
+
+    setData((old) => {
+      old.shift();
+      return old;
+    });
+  };
 
   return (
     <View style={[styles.container, { marginTop: inset.top + 20 }]}>
-      <StoryCard data={data[0]} />
-      <StoryCard data={data[1]} />
+      {uiData
+        .map((data, index) => (
+          <StoryCard
+            data={data}
+            key={index}
+            updateCardsUi={updateCardsUi}
+            inView={index == 0}
+            styles={[
+              index == 2
+                ? { transform: [{ translateY: -5 }] }
+                : { transform: [{ translateY: 0 }] },
+            ]}
+          />
+        ))
+        .reverse()}
     </View>
   );
 };
