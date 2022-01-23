@@ -65,13 +65,14 @@ const StoryCard = ({
     },
     onEnd: () => {
       if (Math.abs(gestureTranslationX.value) > screenWidth * 0.8) {
+        runOnJS(updateCardsUi)();
+
         gestureTranslationX.value = withSpring(
           screenWidth * 2,
           {
             overshootClamping: true,
           },
           () => {
-            runOnJS(updateCardsUi)();
             gestureRotation.value = 0;
             swipeLeftIndicatorOpacity.value = 0;
             swipeRightIndicatorOpacity.value = 0;
@@ -84,7 +85,6 @@ const StoryCard = ({
             );
           }
         );
-
         return;
       }
 
