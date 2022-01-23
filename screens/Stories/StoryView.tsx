@@ -12,40 +12,28 @@ type TData = {
 const StoryView = () => {
   const inset = useSafeAreaInsets();
 
-  const [data, setData] = useState(storyViewData);
-  const [uiData, setUiData] = useState<TData[]>([data[0], data[1]]);
+  const [data, setData] = useState<TData[]>(storyViewData);
+  const [uiData, setUiData] = useState<TData>(data[0]);
 
   useEffect(() => {
-    setData((old) => {
-      old.shift();
-      old.shift();
-      return old;
-    });
-  }, []);
+    setUiData(data[0]);
+  }, [data]);
 
   const updateCardsUi = () => {
-    setUiData((old) => {
-      return [old[1], data[0]];
-    });
-
     setData((old) => {
-      old.shift();
-      return old;
+      const currentData = old.filter((_, i) => i! - 0);
+      return currentData;
     });
   };
 
   return (
     <View style={[styles.container, { marginTop: inset.top + 20 }]}>
-      {uiData
-        .map((data, index) => (
-          <StoryCard
-            data={data}
-            key={index}
-            updateCardsUi={updateCardsUi}
-            inView={index == 0}
-          />
-        ))
-        .reverse()}
+      <StoryCard
+        styles={{}}
+        data={uiData}
+        inView
+        updateCardsUi={updateCardsUi}
+      />
     </View>
   );
 };
