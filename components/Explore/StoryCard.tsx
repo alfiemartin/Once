@@ -242,8 +242,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fce7f3",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
   },
   choicesContainer: {
     flexDirection: "row",
