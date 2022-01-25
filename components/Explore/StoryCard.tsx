@@ -56,56 +56,11 @@ const StoryCard = ({
     onStart: (_, ctx: any) => {
       ctx.startX = gestureTranslationX.value;
     },
-    onActive: (event, ctx) => {
-      gestureTranslationX.value = ctx.startX + event.translationX * 2;
-      gestureRotation.value = ctx.startX + event.translationX;
-      gestureRotation.value = (gestureRotation.value * 90) / screenWidth;
-
-      const right = ctx.startX + event.translationX > 0;
-      (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
-        Math.abs((event.translationX * 3) / screenWidth);
-    },
+    onActive: (event, ctx) => {},
     onEnd: () => {
       if (Math.abs(gestureTranslationX.value) > screenWidth * 0.8) {
-        gestureTranslationX.value = withSpring(
-          screenWidth * 2,
-          {
-            overshootClamping: true,
-          },
-          () => {
-            runOnJS(updateCardsUi)();
-            gestureRotation.value = 0;
-            swipeLeftIndicatorOpacity.value = 0;
-            swipeRightIndicatorOpacity.value = 0;
-            gestureTranslationX.value = withDelay(
-              0,
-              withTiming(-screenWidth, { duration: 0 }, () => {
-                gestureTranslationX.value = withTiming(0, aSwipeConfig);
-              })
-            );
-          }
-        );
-        return;
       }
-
-      gestureTranslationX.value = withSpring(0, { overshootClamping: true });
-      gestureRotation.value = withSpring(0, { overshootClamping: true });
-      swipeLeftIndicatorOpacity.value = withTiming(0, { duration: 100 });
-      swipeRightIndicatorOpacity.value = withTiming(0, { duration: 100 });
     },
-  });
-
-  const gestureSwipeStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: gestureTranslationX.value,
-        },
-        {
-          rotate: `${gestureRotation.value}deg`,
-        },
-      ],
-    };
   });
 
   const aSwipeStyles = useAnimatedStyle(() => {
@@ -140,24 +95,12 @@ const StoryCard = ({
       withTiming((right ? screenWidth : -screenWidth) * 3, aSwipeConfig),
       withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
     );
-
-    // swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
-    //   swipeRotation.value = 0;
-    // });
-
-    // (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
-    //   withTiming(1, { duration: 200 }, () => {
-    //     (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
-    //       withTiming(0, { duration: 200 });
-    //   });
-
-    // updateCardsUi();
   };
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
       <Animated.View
-        style={[styles.container, gestureSwipeStyles, aSwipeStyles]} //aSwipeStyles]}
+        style={[styles.container, aSwipeStyles]} //aSwipeStyles]}
       >
         <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
