@@ -14,6 +14,8 @@ import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
+  withSequence,
   withSpring,
   withTiming,
   WithTimingConfig,
@@ -65,23 +67,21 @@ const StoryCard = ({
     },
     onEnd: () => {
       if (Math.abs(gestureTranslationX.value) > screenWidth * 0.8) {
-        runOnJS(updateCardsUi)();
-
         gestureTranslationX.value = withSpring(
           screenWidth * 2,
           {
             overshootClamping: true,
           },
           () => {
+            runOnJS(updateCardsUi)();
             gestureRotation.value = 0;
             swipeLeftIndicatorOpacity.value = 0;
             swipeRightIndicatorOpacity.value = 0;
-            gestureTranslationX.value = withTiming(
-              -screenWidth,
-              { duration: 0 },
-              () => {
+            gestureTranslationX.value = withDelay(
+              0,
+              withTiming(-screenWidth, { duration: 0 }, () => {
                 gestureTranslationX.value = withTiming(0, aSwipeConfig);
-              }
+              })
             );
           }
         );
@@ -136,37 +136,28 @@ const StoryCard = ({
   const swipeInDirection = (direction: string) => {
     const right = direction === "right";
 
-    swipeTranslationX.value = withTiming(
-      (right ? screenWidth * 2 : -screenWidth * 2) * 1.5,
-      aSwipeConfig,
-      () => {
-        swipeTranslationX.value = withTiming(
-          -screenWidth,
-          { duration: 0 },
-          () => {
-            swipeTranslationX.value = withTiming(0, aSwipeConfig);
-          }
-        );
-      }
+    swipeTranslationX.value = withSequence(
+      withTiming((right ? screenWidth : -screenWidth) * 3, aSwipeConfig),
+      withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
     );
 
-    swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
-      swipeRotation.value = 0;
-    });
+    // swipeRotation.value = withTiming(right ? 45 : -45, aSwipeConfig, () => {
+    //   swipeRotation.value = 0;
+    // });
 
-    (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
-      withTiming(1, { duration: 200 }, () => {
-        (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
-          withTiming(0, { duration: 200 });
-      });
+    // (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
+    //   withTiming(1, { duration: 200 }, () => {
+    //     (right ? swipeRightIndicatorOpacity : swipeLeftIndicatorOpacity).value =
+    //       withTiming(0, { duration: 200 });
+    //   });
 
-    updateCardsUi();
+    // updateCardsUi();
   };
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
       <Animated.View
-        style={[styles.container, gestureSwipeStyles, aSwipeStyles]}
+        style={[styles.container, gestureSwipeStyles, aSwipeStyles]} //aSwipeStyles]}
       >
         <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
@@ -183,7 +174,7 @@ const StoryCard = ({
                 aSwipeRightIndicatorStyles,
               ]}
             >
-              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text>
+              {/* <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text> */}
             </Animated.View>
             <Animated.View
               style={[
@@ -191,7 +182,7 @@ const StoryCard = ({
                 aSwipeLeftIndicatorStyles,
               ]}
             >
-              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text>
+              {/* <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text> */}
             </Animated.View>
           </ImageBackground>
           <View
@@ -201,11 +192,19 @@ const StoryCard = ({
             ]}
           >
             <SwipeIcon
-              name="ios-close-circle"
+              // name='ios-close-circle'
+              name='chevron-down-outline'
               onPress={() => swipeInDirection("left")}
             />
-            <SwipeIcon name="ios-heart-half" />
-            <SwipeIcon name="heart" onPress={() => swipeInDirection("right")} />
+            <SwipeIcon
+              // name='ios-heart-half'
+              name='chevron-down-outline'
+            />
+            <SwipeIcon
+              // name='heart'
+              name='chevron-down-outline'
+              onPress={() => swipeInDirection("right")}
+            />
           </View>
         </View>
       </Animated.View>

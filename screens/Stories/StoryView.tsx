@@ -22,6 +22,9 @@ const StoryView = () => {
   const updateCardsUi = () => {
     setData((old) => {
       const currentData = old.filter((_, i) => i! - 0);
+
+      if (currentData.length == 1) setData(storyViewData);
+
       return currentData;
     });
   };
