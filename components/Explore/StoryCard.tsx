@@ -7,7 +7,6 @@ import {
   StyleSheet,
   StyleProp,
   ViewStyle,
-  Image,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -43,6 +42,25 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
   const swipeTranslationX = useSharedValue(0);
   const swipeRotation = useSharedValue(0);
 
+  const finishSwipeAnimation = () => {
+    "worklet";
+
+    swipeTranslationX.value = withSequence(
+      withTiming(
+        swipeTranslationX.value > 0 ? screenWidth * 1.3 : -screenWidth * 1.3,
+        {
+          duration: 300,
+        }
+      ),
+      withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
+    );
+
+    swipeRotation.value = withSequence(
+      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 300 }),
+      withTiming(0, { duration: 0 })
+    );
+  };
+
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {
       ctx.startX = swipeTranslationX.value;
@@ -56,23 +74,8 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
       );
     },
     onEnd: () => {
-      if (Math.abs(swipeTranslationX.value) > screenWidth * 0.8) {
-        swipeTranslationX.value = withSequence(
-          withTiming(
-            swipeTranslationX.value > 0 ? screenWidth * 2 : -screenWidth * 2,
-            {
-              duration: 300,
-            }
-          ),
-          withTiming(-screenWidth, { duration: 0 }, () =>
-            runOnJS(updateCardsUi)()
-          )
-        );
-        swipeRotation.value = withSequence(
-          withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 300 }),
-          withTiming(0, { duration: 0 })
-        );
-
+      if (Math.abs(swipeTranslationX.value) > screenWidth * 0.6) {
+        finishSwipeAnimation();
         return;
       }
 
