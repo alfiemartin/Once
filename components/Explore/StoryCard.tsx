@@ -47,16 +47,16 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
 
     swipeTranslationX.value = withSequence(
       withTiming(
-        swipeTranslationX.value > 0 ? screenWidth * 1.3 : -screenWidth * 1.3,
+        swipeTranslationX.value > 0 ? screenWidth * 1.5 : -screenWidth * 1.5,
         {
-          duration: 300,
+          duration: 200,
         }
       ),
       withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
     );
 
     swipeRotation.value = withSequence(
-      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 300 }),
+      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 200 }),
       withTiming(0, { duration: 0 })
     );
   };
