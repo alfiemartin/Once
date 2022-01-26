@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import StoryCard from "../../components/Explore/StoryCard";
 import { storyViewData } from "../../mockData";
@@ -11,18 +11,11 @@ type TData = {
 
 const StoryView = () => {
   const inset = useSafeAreaInsets();
-
   const [data, setData] = useState<TData[]>(storyViewData);
-  const [uiData, setUiData] = useState<TData>(data[0]);
-
-  useEffect(() => {
-    setUiData(data[0]);
-  }, [data]);
 
   const updateCardsUi = () => {
     setData((old) => {
-      const currentData = old.filter((_, i) => i! - 0);
-
+      const currentData = old.filter((_, i) => i != 0);
       if (currentData.length == 1) setData(storyViewData);
 
       return currentData;
@@ -33,7 +26,7 @@ const StoryView = () => {
     <View style={[styles.container, { marginTop: inset.top + 20 }]}>
       <StoryCard
         styles={{}}
-        data={uiData}
+        data={data[0]}
         inView
         updateCardsUi={updateCardsUi}
       />

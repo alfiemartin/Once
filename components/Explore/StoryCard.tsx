@@ -1,22 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
   Dimensions,
   ImageBackground,
   View,
-  StyleSheet,
   Text,
+  StyleSheet,
   StyleProp,
   ViewStyle,
+  Image,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
+  interpolate,
   runOnJS,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withSequence,
-  withSpring,
   withTiming,
   WithTimingConfig,
 } from "react-native-reanimated";
@@ -32,34 +33,51 @@ interface IStoryCard {
   inView: boolean;
 }
 
-const StoryCard = ({
-  data,
-  styles: viewStyles,
-  updateCardsUi,
-  inView,
-}: IStoryCard) => {
-  const image = data.image;
+const aSwipeConfig: WithTimingConfig = {
+  duration: 300,
+};
+
+const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
   const screenWidth = Dimensions.get("screen").width;
 
-  const gestureTranslationX = useSharedValue(0);
   const swipeTranslationX = useSharedValue(0);
   const swipeRotation = useSharedValue(0);
-  const gestureRotation = useSharedValue(0);
-  const swipeLeftIndicatorOpacity = useSharedValue(0);
-  const swipeRightIndicatorOpacity = useSharedValue(0);
-
-  const aSwipeConfig: WithTimingConfig = {
-    duration: 500,
-  };
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {
-      ctx.startX = gestureTranslationX.value;
+      ctx.startX = swipeTranslationX.value;
     },
-    onActive: (event, ctx) => {},
+    onActive: (event, ctx) => {
+      swipeTranslationX.value = event.translationX;
+      swipeRotation.value = interpolate(
+        event.translationX,
+        [0, screenWidth],
+        [0, 45]
+      );
+    },
     onEnd: () => {
-      if (Math.abs(gestureTranslationX.value) > screenWidth * 0.8) {
+      if (Math.abs(swipeTranslationX.value) > screenWidth * 0.8) {
+        swipeTranslationX.value = withSequence(
+          withTiming(
+            swipeTranslationX.value > 0 ? screenWidth * 2 : -screenWidth * 2,
+            {
+              duration: 300,
+            }
+          ),
+          withTiming(-screenWidth, { duration: 0 }, () =>
+            runOnJS(updateCardsUi)()
+          )
+        );
+        swipeRotation.value = withSequence(
+          withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 300 }),
+          withTiming(0, { duration: 0 })
+        );
+
+        return;
       }
+
+      swipeTranslationX.value = withTiming(0, aSwipeConfig);
+      swipeRotation.value = withTiming(0, aSwipeConfig);
     },
   });
 
@@ -76,78 +94,49 @@ const StoryCard = ({
     };
   });
 
-  const aSwipeLeftIndicatorStyles = useAnimatedStyle(() => {
-    return {
-      opacity: swipeLeftIndicatorOpacity.value,
-    };
-  });
-
-  const aSwipeRightIndicatorStyles = useAnimatedStyle(() => {
-    return {
-      opacity: swipeRightIndicatorOpacity.value,
-    };
-  });
-
   const swipeInDirection = (direction: string) => {
     const right = direction === "right";
 
     swipeTranslationX.value = withSequence(
-      withTiming((right ? screenWidth : -screenWidth) * 3, aSwipeConfig),
+      withTiming((right ? screenWidth : -screenWidth) * 2, aSwipeConfig),
       withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
+    );
+
+    swipeRotation.value = withSequence(
+      withTiming(right ? 45 : -45, aSwipeConfig),
+      withTiming(0, { duration: 0 })
     );
   };
 
+  useEffect(() => {
+    Image.prefetch(data.image).then(() => {
+      swipeTranslationX.value = withDelay(50, withTiming(0, aSwipeConfig));
+    });
+  }, [data]);
+
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View
-        style={[styles.container, aSwipeStyles]} //aSwipeStyles]}
-      >
+      <Animated.View style={[styles.container, aSwipeStyles]}>
         <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
-            source={{ uri: image }}
+            source={{ uri: data.image }}
             style={[styles.mainImage]}
-            imageStyle={[
-              styles.mainImage,
-              { display: inView ? "flex" : "none" },
-            ]}
+            imageStyle={[styles.mainImage]}
           >
-            <Animated.View
-              style={[
-                styles.swipeIndicatorContainer,
-                aSwipeRightIndicatorStyles,
-              ]}
-            >
-              {/* <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text> */}
+            <Animated.View style={[styles.swipeIndicatorContainer]}>
+              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text>
             </Animated.View>
-            <Animated.View
-              style={[
-                styles.swipeIndicatorContainer,
-                aSwipeLeftIndicatorStyles,
-              ]}
-            >
-              {/* <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text> */}
+            <Animated.View style={[styles.swipeIndicatorContainer]}>
+              <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text>
             </Animated.View>
           </ImageBackground>
-          <View
-            style={[
-              styles.choicesContainer,
-              { display: inView ? "flex" : "none" },
-            ]}
-          >
+          <View style={[styles.choicesContainer]}>
             <SwipeIcon
-              // name='ios-close-circle'
-              name='chevron-down-outline'
+              name='ios-close-circle'
               onPress={() => swipeInDirection("left")}
             />
-            <SwipeIcon
-              // name='ios-heart-half'
-              name='chevron-down-outline'
-            />
-            <SwipeIcon
-              // name='heart'
-              name='chevron-down-outline'
-              onPress={() => swipeInDirection("right")}
-            />
+            <SwipeIcon name='ios-heart-half' />
+            <SwipeIcon name='heart' onPress={() => swipeInDirection("right")} />
           </View>
         </View>
       </Animated.View>
@@ -195,6 +184,7 @@ const styles = StyleSheet.create({
   },
   swipeIndicatorContainer: {
     position: "absolute",
+    display: "none",
     left: 0,
     right: 0,
     top: 0,
