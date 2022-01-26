@@ -17,6 +17,7 @@ import Animated, {
   useSharedValue,
   withDelay,
   withSequence,
+  withSpring,
   withTiming,
   WithTimingConfig,
 } from "react-native-reanimated";
@@ -35,43 +36,43 @@ interface IStoryCard {
 const aSwipeConfig: WithTimingConfig = {
   duration: 300,
 };
+const instantTiming: WithTimingConfig = {
+  duration: 0,
+};
 
 const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
   const screenWidth = Dimensions.get("screen").width;
+  const screenHeight = Dimensions.get("screen").height;
 
   const swipeTranslationX = useSharedValue(0);
+  const swipeTranslationY = useSharedValue(0);
+  const swipeScale = useSharedValue(1);
   const swipeRotation = useSharedValue(0);
 
   const finishSwipeAnimation = () => {
     "worklet";
+    const right = swipeTranslationX.value > 0;
 
     swipeTranslationX.value = withSequence(
-      withTiming(
-        swipeTranslationX.value > 0 ? screenWidth * 1.5 : -screenWidth * 1.5,
-        {
-          duration: 200,
-        }
-      ),
-      withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
+      withTiming(right ? screenWidth * 1.5 : -screenWidth * 1.5, {
+        duration: 200,
+      }),
+      withTiming(0, { duration: 0 }, () => runOnJS(updateCardsUi)())
     );
 
+    swipeTranslationY.value = withDelay(200, withTiming(screenHeight, instantTiming));
+    swipeScale.value = withDelay(200, withTiming(0.1, { duration: 0 }));
+
     swipeRotation.value = withSequence(
-      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 100 }),
-      withTiming(0, { duration: 0 })
+      withTiming(right ? 45 : -45, { duration: 100 }),
+      withTiming(0, instantTiming)
     );
   };
 
   const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: any) => {
-      ctx.startX = swipeTranslationX.value;
-    },
     onActive: (event, ctx) => {
       swipeTranslationX.value = event.translationX;
-      swipeRotation.value = interpolate(
-        event.translationX,
-        [0, screenWidth],
-        [0, 45]
-      );
+      swipeRotation.value = interpolate(event.translationX, [0, screenWidth], [0, 45]);
     },
     onEnd: () => {
       if (Math.abs(swipeTranslationX.value) > screenWidth * 0.6) {
@@ -91,6 +92,12 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
           translateX: swipeTranslationX.value,
         },
         {
+          translateY: swipeTranslationY.value,
+        },
+        {
+          scale: swipeScale.value,
+        },
+        {
           rotate: `${swipeRotation.value}deg`,
         },
       ],
@@ -101,18 +108,26 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
     const right = direction === "right";
 
     swipeTranslationX.value = withSequence(
-      withTiming((right ? screenWidth : -screenWidth) * 2, aSwipeConfig),
-      withTiming(-screenWidth, { duration: 0 }, () => runOnJS(updateCardsUi)())
+      withTiming((right ? screenWidth : -screenWidth) * 1.5, aSwipeConfig),
+      withTiming(0, instantTiming, () => runOnJS(updateCardsUi)())
     );
+
+    swipeTranslationY.value = withDelay(
+      aSwipeConfig.duration as number,
+      withTiming(screenHeight, instantTiming)
+    );
+
+    swipeScale.value = withDelay(aSwipeConfig.duration as number, withTiming(0.8, instantTiming));
 
     swipeRotation.value = withSequence(
       withTiming(right ? 45 : -45, aSwipeConfig),
-      withTiming(0, { duration: 0 })
+      withTiming(0, instantTiming)
     );
   };
 
   const bringNewCard = () => {
-    swipeTranslationX.value = withDelay(50, withTiming(0, aSwipeConfig));
+    swipeTranslationY.value = withSpring(0, { damping: 17, velocity: 9000 });
+    swipeScale.value = withDelay(100, withTiming(1, aSwipeConfig));
   };
 
   return (
@@ -123,7 +138,7 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
             onLoad={bringNewCard}
             source={{ uri: data.image }}
             style={[styles.mainImage]}
-            imageStyle={[styles.mainImage]}
+            imageStyle={styles.mainImageInner}
           >
             <Animated.View style={[styles.swipeIndicatorContainer]}>
               <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❤️</Text>
@@ -133,10 +148,7 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
             </Animated.View>
           </ImageBackground>
           <View style={[styles.choicesContainer]}>
-            <SwipeIcon
-              name='ios-close-circle'
-              onPress={() => swipeInDirection("left")}
-            />
+            <SwipeIcon name='ios-close-circle' onPress={() => swipeInDirection("left")} />
             <SwipeIcon name='ios-heart-half' />
             <SwipeIcon name='heart' onPress={() => swipeInDirection("right")} />
           </View>
@@ -172,9 +184,19 @@ const styles = StyleSheet.create({
   mainImage: {
     flex: 1,
     justifyContent: "space-between",
+    backgroundColor: "#fbcfe8",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  mainImageInner: {
+    margin: 2,
+    flex: 1,
+    justifyContent: "space-between",
     backgroundColor: "#fce7f3",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    // borderBottomLeftRadius: 20,
+    // borderBottomRightRadius: 20,
   },
   choicesContainer: {
     flexDirection: "row",
