@@ -108,17 +108,16 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
     );
   };
 
-  useEffect(() => {
-    Image.prefetch(data.image).then(() => {
-      swipeTranslationX.value = withDelay(50, withTiming(0, aSwipeConfig));
-    });
-  }, [data]);
+  const bringNewCard = () => {
+    swipeTranslationX.value = withDelay(50, withTiming(0, aSwipeConfig));
+  };
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
       <Animated.View style={[styles.container, aSwipeStyles]}>
         <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
+            onLoad={bringNewCard}
             source={{ uri: data.image }}
             style={[styles.mainImage]}
             imageStyle={[styles.mainImage]}
