@@ -56,7 +56,7 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
     );
 
     swipeRotation.value = withSequence(
-      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 200 }),
+      withTiming(swipeTranslationX.value > 0 ? 45 : -45, { duration: 100 }),
       withTiming(0, { duration: 0 })
     );
   };
