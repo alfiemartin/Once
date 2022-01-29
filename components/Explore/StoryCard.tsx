@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
+  Easing,
   interpolate,
   runOnJS,
   useAnimatedGestureHandler,
@@ -24,17 +25,16 @@ import Animated, {
 import SwipeIcon from "../SwipeIcon/SwipeIcon";
 
 interface IStoryCard {
-  data: {
+  data?: {
     name: string;
     image: string;
   };
   styles?: StyleProp<ViewStyle>;
-  updateCardsUi: () => void;
-  inView: boolean;
+  updateCardsUi?: () => void;
 }
 
 const aSwipeConfig: WithTimingConfig = {
-  duration: 300,
+  duration: 150,
 };
 const instantTiming: WithTimingConfig = {
   duration: 0,
@@ -55,16 +55,18 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
 
     swipeTranslationX.value = withSequence(
       withTiming(right ? screenWidth * 1.5 : -screenWidth * 1.5, {
-        duration: 200,
+        duration: 50,
       }),
-      withTiming(0, { duration: 0 }, () => runOnJS(updateCardsUi)())
+      withTiming(0, instantTiming, () => {
+        if (updateCardsUi) runOnJS(updateCardsUi)();
+      })
     );
 
-    swipeTranslationY.value = withDelay(200, withTiming(screenHeight, instantTiming));
-    swipeScale.value = withDelay(200, withTiming(0.1, { duration: 0 }));
+    swipeTranslationY.value = withDelay(50, withTiming(screenHeight, instantTiming));
+    swipeScale.value = withDelay(50, withTiming(0.1, instantTiming));
 
     swipeRotation.value = withSequence(
-      withTiming(right ? 45 : -45, { duration: 100 }),
+      withTiming(right ? 45 : -45, { duration: 50 }),
       withTiming(0, instantTiming)
     );
   };
@@ -108,8 +110,10 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
     const right = direction === "right";
 
     swipeTranslationX.value = withSequence(
-      withTiming((right ? screenWidth : -screenWidth) * 1.5, aSwipeConfig),
-      withTiming(0, instantTiming, () => runOnJS(updateCardsUi)())
+      withTiming((right ? screenWidth : -screenWidth) * 1.3, aSwipeConfig),
+      withTiming(0, instantTiming, () => {
+        if (updateCardsUi) runOnJS(updateCardsUi)();
+      })
     );
 
     swipeTranslationY.value = withDelay(
@@ -126,17 +130,17 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
   };
 
   const bringNewCard = () => {
-    swipeTranslationY.value = withSpring(0, { damping: 17, velocity: 9000 });
-    swipeScale.value = withDelay(100, withTiming(1, aSwipeConfig));
+    swipeTranslationY.value = withTiming(0, { duration: 250 });
+    swipeScale.value = withTiming(1, { ...aSwipeConfig, easing: Easing.out(Easing.exp) });
   };
 
   return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[styles.container, aSwipeStyles]}>
+    <PanGestureHandler onGestureEvent={data && gestureHandler}>
+      <Animated.View style={[viewStyles ?? styles.container, aSwipeStyles]}>
         <View style={[styles.cardContainer, viewStyles]}>
           <ImageBackground
             onLoad={bringNewCard}
-            source={{ uri: data.image }}
+            source={{ uri: data && data.image }}
             style={[styles.mainImage]}
             imageStyle={styles.mainImageInner}
           >
@@ -147,11 +151,16 @@ const StoryCard = ({ data, styles: viewStyles, updateCardsUi }: IStoryCard) => {
               <Text style={[{ zIndex: 1000, fontSize: 200 }]}>❌</Text>
             </Animated.View>
           </ImageBackground>
-          <View style={[styles.choicesContainer]}>
-            <SwipeIcon name='ios-close-circle' onPress={() => swipeInDirection("left")} />
-            <SwipeIcon name='ios-heart-half' />
-            <SwipeIcon name='heart' onPress={() => swipeInDirection("right")} />
-          </View>
+          {data && (
+            <View style={[styles.choicesContainer]}>
+              {/* <SwipeIcon name='ios-close-circle' onPress={() => swipeInDirection("left")} />
+              <SwipeIcon name='ios-heart-half' />
+              <SwipeIcon name='heart' onPress={() => swipeInDirection("right")} /> */}
+              <SwipeIcon name='disc-sharp' onPress={() => swipeInDirection("left")} />
+              <SwipeIcon name='disc-sharp' />
+              <SwipeIcon name='disc-sharp' onPress={() => swipeInDirection("right")} />
+            </View>
+          )}
         </View>
       </Animated.View>
     </PanGestureHandler>

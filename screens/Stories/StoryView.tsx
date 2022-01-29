@@ -14,6 +14,8 @@ const StoryView = () => {
   const [data, setData] = useState<TData[]>(storyViewData);
 
   const updateCardsUi = () => {
+    Image.prefetch(data[1].image);
+
     setData((old) => {
       const currentData = old.filter((_, i) => i != 0);
       if (currentData.length == 1) setData(storyViewData);
@@ -24,12 +26,7 @@ const StoryView = () => {
 
   return (
     <View style={[styles.container, { marginTop: inset.top + 20 }]}>
-      <StoryCard
-        styles={{}}
-        data={data[0]}
-        inView
-        updateCardsUi={updateCardsUi}
-      />
+      <StoryCard data={data[0]} updateCardsUi={updateCardsUi} />
     </View>
   );
 };
@@ -37,7 +34,7 @@ const StoryView = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: "#fae8ff",
   },
 });
